@@ -1,9 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 
-# Inicializamos la instancia de SQLAlchemy
+# Inicializamos la instancia de la base de datos
 db = SQLAlchemy()
 
-# Definimos cómo se verá nuestra tabla en PostgreSQL
+# Definimos el modelo de Usuario
 class User(db.Model):
     __tablename__ = 'users'
     
