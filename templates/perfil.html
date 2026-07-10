@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassPort Inc. - Mi Perfil</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+        }
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+        h1 {
+            color: #f1f5f9;
+            font-size: 28px;
+            margin: 0;
+        }
+        .role-badge {
+            background-color: #3b82f6;
+            color: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+        p {
+            color: #cbd5e1;
+            font-size: 16px;
+        }
+        .vault-box {
+            background-color: #0f172a;
+            border: 1px dashed #475569;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 24px;
+        }
+        .logout-btn {
+            display: inline-block;
+            margin-top: 28px;
+            padding: 10px 20px;
+            background-color: #475569;
+            color: #f8fafc;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .logout-btn:hover {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-area">
+        <h1>Mi Identidad Digital</h1>
+        <span class="role-badge">Usuario Estándar</span>
+    </div>
+    
+    <p>Bienvenido de vuelta, <strong>{{ usuario }}</strong>. Tu sesión JWT sin estado ha sido verificada a través de Cookies seguras.</p>
+    
+    <div class="vault-box">
+        📂 Tu bóveda de documentos está vacía. Aquí se guardarán tus pasaportes digitales próximamente.
+    </div>
+
+    <a href="/logout" class="logout-btn">Cerrar sesión</a>
+</div>
+
+</body>
+</html>

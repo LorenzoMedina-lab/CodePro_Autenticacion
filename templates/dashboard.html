@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassPort Inc. - Dashboard Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 40px;
+            display: none; /* Ocultamos la página inicialmente hasta validar el token */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+        }
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+        h1 { color: #f1f5f9; font-size: 28px; margin: 0; }
+        .role-badge { background-color: #10b981; color: #042f2e; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        p { color: #cbd5e1; font-size: 16px; line-height: 1.6; }
+        .alert-panel { background-color: rgba(37, 99, 235, 0.1); border-left: 4px solid #2563eb; color: #93c5fd; padding: 16px; border-radius: 0 8px 8px 0; margin-top: 24px; }
+        .logout-btn { display: inline-block; margin-top: 28px; padding: 10px 20px; background-color: #475569; color: #f8fafc; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
+        .logout-btn:hover { background-color: #334155; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-area">
+        <h1>Panel de Administración</h1>
+        <span class="role-badge">Administrador</span>
+    </div>
+    
+    <p>Hola, <strong id="userDisplayName">Administrador</strong>. Autenticación completada con éxito.</p>
+    
+    <div class="alert-panel">
+        🔒 <strong>Mecanismo de Sesión:</strong> Verificación criptográfica activa. Has accedido utilizando el método seleccionado en el portal seguro.
+    </div>
+
+    <button onclick="cerrarSesion()" class="logout-btn">Cerrar sesión de forma segura</button>
+</div>
+
+<script>
+    // Al cargar la página, verificamos si tenemos acceso legítimo
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Intentamos recuperar el token del localStorage por si inició como JWT sin estado
+        const tokenStateless = localStorage.getItem('passport_stateless_token');
+        
+        // Pasamos el nombre dinámico del usuario que guardamos en Jinja si vino por Cookie,
+        // o dejamos que se renderice.
+        const usuarioJinja = "{{ usuario }}";
+
+        if (usuarioJinja && usuarioJinja !== "" && usuarioJinja !== "None") {
+            // Caso A: Entró por cookies. Todo en orden. Mostramos el cuerpo.
+            document.getElementById('userDisplayName').innerText = usuarioJinja;
+            document.body.style.display = "block";
+        } else if (tokenStateless) {
+            // Caso B: Entró por JWT puro. Validamos de forma asíncrona contra la API enviando el Header
+            try {
+                const response = await fetch('/api/auth/admin/dashboard', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${tokenStateless}` }
+                });
+                
+                if (response.ok) {
+                    // El token es válido, extraemos los datos si es necesario y mostramos la vista
+                    document.getElementById('userDisplayName').innerText = "Admin (Stateless)";
+                    document.body.style.display = "block";
+                } else {
+                    limpiarYSalir();
+                }
+            } catch (error) {
+                limpiarYSalir();
+            }
+        } else {
+            limpiarYSalir();
+        }
+    });
+
+    function limpiarYSalir() {
+        localStorage.removeItem('passport_stateless_token');
+        window.location.href = '/?error=acceso_denegado';
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem('passport_stateless_token');
+        window.location.href = '/logout';
+    }
+</script>
+</body>
+</html>

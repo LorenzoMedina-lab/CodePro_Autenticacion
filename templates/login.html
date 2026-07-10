@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PassPort Inc. - Iniciar Sesión</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #334155;
+        }
+        h2 {
+            color: #f1f5f9;
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+        p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #f8fafc;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* 🆕 Diseño para el Selector de tipo de Sesión */
+        .session-selector {
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .session-title {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 16px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #f1f5f9;
+            cursor: pointer;
+            margin: 0;
+        }
+        .radio-label input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 8px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #93c5fd;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .register-link:hover {
+            color: #bfdbfe;
+            text-decoration: underline;
+        }
+        .error-msg {
+            color: #fca5a5;
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>PassPort Inc.</h2>
+    <p>Gestor de Identidad Digital Seguro</p>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" required placeholder="ejemplo@correo.com">
+        </div>
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" required placeholder="••••••••">
+        </div>
+
+        <div class="session-selector">
+            <div class="session-title">Tipo de sesión preferida</div>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="auth_method" value="cookie" checked> 🍪 Cookie (Persistente)
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="auth_method" value="jwt"> 🔐 JWT (Sin Estado)
+                </label>
+            </div>
+        </div>
+
+        <button type="submit">Ingresar al sistema</button>
+        <div id="errorBox" class="error-msg"></div>
+        <a href="/registro" class="register-link">¿No tienes cuenta? Regístrate</a>
+    </form>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorBox = document.getElementById('errorBox');
+        errorBox.style.display = 'none';
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // 🆕 Capturamos cuál de los dos botones de opción seleccionó el usuario
+        const auth_method = document.querySelector('input[name="auth_method"]:checked').value;
+
+        try {
+            // 🛡️ Obtenemos un token CSRF fresco antes de enviar credenciales
+            const csrfResponse = await fetch('/api/auth/csrf-token');
+            const csrfData = await csrfResponse.json();
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 🛡️ Enviamos el token CSRF para peticiones web basadas en cookies
+                    'X-CSRFToken': csrfData.csrf_token
+                },
+                // 🆕 Enviamos el método de autenticación elegido al backend
+                body: JSON.stringify({ email, password, auth_method })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                
+                // Si el usuario elige "jwt" (sin estado), para un flujo web real tendríamos que
+                // guardar el token en memoria. Para cumplir con el redirect de nuestra demo interactiva,
+                // si la sesión es "jwt" simularemos un almacenamiento temporal.
+                if (auth_method === 'jwt') {
+                    localStorage.setItem('passport_stateless_token', data.token);
+                }
+
+                if (data.rol === 'admin') {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    window.location.href = '/perfil';
+                }
+            } else {
+                errorBox.innerText = data.error || 'Error al iniciar sesión';
+                errorBox.style.display = 'block';
+            }
+        } catch (error) {
+            errorBox.innerText = 'Error al conectar con el servidor';
+            errorBox.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>
